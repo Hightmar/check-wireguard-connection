@@ -12,6 +12,9 @@ monIp="10.10.10.10"
 # Path to your wireguard config files
 path="/path/to/WG_FILES"
 
+# Name for grep command
+nameInterface="WG"
+
 ###############
 ## TEST PING ##
 ###############
@@ -32,11 +35,9 @@ if [ "$alive" = 0 ] && [ "$ip" != "$monIp" ]; then
 	exit
 else
 	# If something is wrong, get the interface name, disconnected and reconnect
-	interfaces=$(ifconfig -a | sed 's/[ \t:].*//;/^$/d')
-	wgInterfaces=$(echo "$interfaces" | sed 's/eth0\|lo\|wlan0\| //g')
-	sudo wg-quick down "$wgInterfaces"
+	interface=$(ifconfig -a | grep "$nameInterface" | grep -wv "inet" | sed 's/:.*$//g')
+	sudo wg-quick down "$interface"
 	sleep 1
-	
 	# Script for random connction if you have many files
 	"$path"/random_connection_wg.sh
 fi
